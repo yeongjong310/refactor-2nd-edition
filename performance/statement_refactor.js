@@ -38,16 +38,16 @@ module.exports = function statement(invoice, plays) {
   }).format;
 
   for (let perf of invoice.performances) {
-    const play = playFor(perf);
-    let thisAmount = amountFor(perf, play);
+    let thisAmount = amountFor(perf, playFor(perf));
 
     // add volume credits
     volumeCredits += Math.max(perf.audience - 30, 0);
 
     // add extra credit for every ten comedy attendees
-    if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    if ("comedy" === playFor(perf).type)
+      volumeCredits += Math.floor(perf.audience / 5);
 
-    result += ` ${play.name}: ${format(thisAmount / 100)} (${
+    result += ` ${playFor(perf).name}: ${format(thisAmount / 100)} (${
       perf.audience
     }석)\n`;
     totalAmount += thisAmount;
