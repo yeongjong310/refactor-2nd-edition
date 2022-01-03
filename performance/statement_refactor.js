@@ -29,6 +29,14 @@ module.exports = function statement(invoice, plays) {
     return volumeCredits;
   }
 
+  function totalVolumeCredits() {
+    let volumeCredits = 0;
+    for (let perf of invoice.performances) {
+      volumeCredits += volumeCreditFor(perf);
+    }
+    return volumeCredits;
+  }
+
   function playFor(aPerformance) {
     return plays[aPerformance.playID];
   }
@@ -49,12 +57,7 @@ module.exports = function statement(invoice, plays) {
     totalAmount += amountFor(perf);
   }
 
-  let volumeCredits = 0;
-  for (let perf of invoice.performances) {
-    volumeCredits += volumeCreditFor(perf);
-  }
-
   result += `총액: ${format(totalAmount / 100)}\n`;
-  result += `적립 포인트: ${volumeCredits}점\n`;
+  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
   return result;
 };
