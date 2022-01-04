@@ -44,20 +44,22 @@ module.exports = function statement(invoice, plays) {
   let totalAmount = 0;
   let result = `Statement for ${invoice.customer}\n`;
 
-  const format = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format;
+  const formatAsUSD = (number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(number / 100);
+  };
 
   for (let perf of invoice.performances) {
-    result += ` ${playFor(perf).name}: ${format(amountFor(perf) / 100)} (${
+    result += ` ${playFor(perf).name}: ${formatAsUSD(amountFor(perf))} (${
       perf.audience
     }석)\n`;
     totalAmount += amountFor(perf);
   }
 
-  result += `총액: ${format(totalAmount / 100)}\n`;
+  result += `총액: ${formatAsUSD(totalAmount)}\n`;
   result += `적립 포인트: ${totalVolumeCredits()}점\n`;
   return result;
 };
