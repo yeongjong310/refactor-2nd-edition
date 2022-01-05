@@ -1,4 +1,25 @@
 module.exports = function statement(invoice, plays) {
+  let result = `Statement for ${invoice.customer}\n`;
+
+  for (let perf of invoice.performances) {
+    result += ` ${playFor(perf).name}: ${formatAsUSD(amountFor(perf))} (${
+      perf.audience
+    }석)\n`;
+  }
+
+  result += `총액: ${formatAsUSD(totalAmount())}\n`;
+  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
+
+  return result;
+
+  function totalAmount() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += amountFor(perf);
+    }
+    return result;
+  }
+
   function amountFor(aPerformance) {
     let result = 0;
 
@@ -22,44 +43,30 @@ module.exports = function statement(invoice, plays) {
     return result;
   }
 
-  function volumeCreditFor(perf) {
-    let volumeCredits = Math.max(perf.audience - 30, 0);
-    if ("comedy" === playFor(perf).type)
-      volumeCredits += Math.floor(perf.audience / 5);
-    return volumeCredits;
-  }
-
-  function totalVolumeCredits() {
-    let volumeCredits = 0;
-    for (let perf of invoice.performances) {
-      volumeCredits += volumeCreditFor(perf);
-    }
-    return volumeCredits;
-  }
-
-  function playFor(aPerformance) {
-    return plays[aPerformance.playID];
-  }
-
-  let totalAmount = 0;
-  let result = `Statement for ${invoice.customer}\n`;
-
-  const formatAsUSD = (number) => {
+  function formatAsUSD(number) {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
     }).format(number / 100);
-  };
-
-  for (let perf of invoice.performances) {
-    result += ` ${playFor(perf).name}: ${formatAsUSD(amountFor(perf))} (${
-      perf.audience
-    }석)\n`;
-    totalAmount += amountFor(perf);
   }
 
-  result += `총액: ${formatAsUSD(totalAmount)}\n`;
-  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
-  return result;
+  function volumeCreditFor(perf) {
+    let result = Math.max(perf.audience - 30, 0);
+    if ("comedy" === playFor(perf).type)
+      result += Math.floor(perf.audience / 5);
+    return result;
+  }
+
+  function totalVolumeCredits() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += volumeCreditFor(perf);
+    }
+    return result;
+  }
+
+  function playFor(aPerformance) {
+    return plays[aPerformance.playID];
+  }
 };
