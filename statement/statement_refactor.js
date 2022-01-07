@@ -1,8 +1,27 @@
 module.exports = function statement(invoice, plays) {
-  let result = `Statement for ${invoice.customer}\n`;
+  const statementData = {
+    customer: invoice.customer,
+    performances: invoice.performances.map(enrichPerformance),
+  };
 
-  for (let perf of invoice.performances) {
-    result += ` ${playFor(perf).name}: ${formatAsUSD(amountFor(perf))} (${
+  return renderPlainText(statementData);
+
+  function enrichPerformance(aPerformance) {
+    const result = Object.assign({}, aPerformance);
+    result.play = playFor(aPerformance);
+    return result;
+  }
+
+  function playFor(aPerformance) {
+    return plays[aPerformance.playID];
+  }
+};
+
+function renderPlainText(data) {
+  let result = `Statement for ${data.customer}\n`;
+
+  for (let perf of data.performances) {
+    result += ` ${perf.play.name}: ${formatAsUSD(amountFor(perf))} (${
       perf.audience
     }석)\n`;
   }
@@ -14,7 +33,7 @@ module.exports = function statement(invoice, plays) {
 
   function totalAmount() {
     let result = 0;
-    for (let perf of invoice.performances) {
+    for (let perf of data.performances) {
       result += amountFor(perf);
     }
     return result;
@@ -23,7 +42,7 @@ module.exports = function statement(invoice, plays) {
   function amountFor(aPerformance) {
     let result = 0;
 
-    switch (playFor(aPerformance).type) {
+    switch (aPerformance.play.type) {
       case "tragedy":
         result += 40000;
         if (aPerformance.audience > 30) {
@@ -37,7 +56,7 @@ module.exports = function statement(invoice, plays) {
         }
         break;
       default:
-        throw new Error(`알 수 없는 장르: ${playFor(aPerformance).type}`);
+        throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
     }
 
     return result;
@@ -53,20 +72,15 @@ module.exports = function statement(invoice, plays) {
 
   function volumeCreditFor(perf) {
     let result = Math.max(perf.audience - 30, 0);
-    if ("comedy" === playFor(perf).type)
-      result += Math.floor(perf.audience / 5);
+    if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
     return result;
   }
 
   function totalVolumeCredits() {
     let result = 0;
-    for (let perf of invoice.performances) {
+    for (let perf of data.performances) {
       result += volumeCreditFor(perf);
     }
     return result;
   }
-
-  function playFor(aPerformance) {
-    return plays[aPerformance.playID];
-  }
-};
+}
