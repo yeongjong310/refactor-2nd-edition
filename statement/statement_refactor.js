@@ -1,8 +1,9 @@
 module.exports = function statement(invoice, plays) {
-  const statementData = {
-    customer: invoice.customer,
-    performances: invoice.performances.map(enrichPerformance),
-  };
+  const statementData = {};
+  statementData.customer = invoice.customer;
+  statementData.performances = invoice.performances.map(enrichPerformance);
+  statementData.totalAmount = totalAmount(statementData);
+  statementData.totalVolumeCredits = totalVolumeCredits(statementData);
 
   return renderPlainText(statementData);
 
@@ -46,6 +47,22 @@ module.exports = function statement(invoice, plays) {
     if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
     return result;
   }
+
+  function totalAmount(data) {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += perf.amount;
+    }
+    return result;
+  }
+
+  function totalVolumeCredits(data) {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += perf.volumeCredit;
+    }
+    return result;
+  }
 };
 
 function renderPlainText(data) {
@@ -57,18 +74,10 @@ function renderPlainText(data) {
     }석)\n`;
   }
 
-  result += `총액: ${formatAsUSD(totalAmount())}\n`;
-  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
+  result += `총액: ${formatAsUSD(data.totalAmount)}\n`;
+  result += `적립 포인트: ${data.totalVolumeCredits}점\n`;
 
   return result;
-
-  function totalAmount() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += perf.amount;
-    }
-    return result;
-  }
 
   function formatAsUSD(number) {
     return new Intl.NumberFormat("en-US", {
@@ -76,13 +85,5 @@ function renderPlainText(data) {
       currency: "USD",
       minimumFractionDigits: 2,
     }).format(number / 100);
-  }
-
-  function totalVolumeCredits() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += perf.volumeCredit;
-    }
-    return result;
   }
 }
