@@ -10,6 +10,7 @@ module.exports = function statement(invoice, plays) {
     const result = Object.assign({}, aPerformance);
     result.play = playFor(result);
     result.amount = amountFor(result);
+    result.volumeCredit = volumeCreditFor(result);
     return result;
   }
 
@@ -37,6 +38,12 @@ module.exports = function statement(invoice, plays) {
         throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
     }
 
+    return result;
+  }
+
+  function volumeCreditFor(perf) {
+    let result = Math.max(perf.audience - 30, 0);
+    if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
     return result;
   }
 };
@@ -71,16 +78,10 @@ function renderPlainText(data) {
     }).format(number / 100);
   }
 
-  function volumeCreditFor(perf) {
-    let result = Math.max(perf.audience - 30, 0);
-    if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
-    return result;
-  }
-
   function totalVolumeCredits() {
     let result = 0;
     for (let perf of data.performances) {
-      result += volumeCreditFor(perf);
+      result += perf.volumeCredit;
     }
     return result;
   }
