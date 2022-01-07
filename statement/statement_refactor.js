@@ -8,35 +8,13 @@ module.exports = function statement(invoice, plays) {
 
   function enrichPerformance(aPerformance) {
     const result = Object.assign({}, aPerformance);
-    result.play = playFor(aPerformance);
+    result.play = playFor(result);
+    result.amount = amountFor(result);
     return result;
   }
 
   function playFor(aPerformance) {
     return plays[aPerformance.playID];
-  }
-};
-
-function renderPlainText(data) {
-  let result = `Statement for ${data.customer}\n`;
-
-  for (let perf of data.performances) {
-    result += ` ${perf.play.name}: ${formatAsUSD(amountFor(perf))} (${
-      perf.audience
-    }석)\n`;
-  }
-
-  result += `총액: ${formatAsUSD(totalAmount())}\n`;
-  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
-
-  return result;
-
-  function totalAmount() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += amountFor(perf);
-    }
-    return result;
   }
 
   function amountFor(aPerformance) {
@@ -59,6 +37,29 @@ function renderPlainText(data) {
         throw new Error(`알 수 없는 장르: ${aPerformance.play.type}`);
     }
 
+    return result;
+  }
+};
+
+function renderPlainText(data) {
+  let result = `Statement for ${data.customer}\n`;
+
+  for (let perf of data.performances) {
+    result += ` ${perf.play.name}: ${formatAsUSD(perf.amount)} (${
+      perf.audience
+    }석)\n`;
+  }
+
+  result += `총액: ${formatAsUSD(totalAmount())}\n`;
+  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
+
+  return result;
+
+  function totalAmount() {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += perf.amount;
+    }
     return result;
   }
 
