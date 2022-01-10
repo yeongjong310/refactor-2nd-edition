@@ -1,11 +1,15 @@
 module.exports = function statement(invoice, plays) {
+  return renderPlainText(createStatementData(invoice, plays));
+};
+
+function createStatementData(invoice, plays) {
   const statementData = {};
   statementData.customer = invoice.customer;
   statementData.performances = invoice.performances.map(enrichPerformance);
   statementData.totalAmount = totalAmount(statementData);
   statementData.totalVolumeCredits = totalVolumeCredits(statementData);
 
-  return renderPlainText(statementData);
+  return statementData;
 
   function enrichPerformance(aPerformance) {
     const result = Object.assign({}, aPerformance);
@@ -58,7 +62,7 @@ module.exports = function statement(invoice, plays) {
       0
     );
   }
-};
+}
 
 function renderPlainText(data) {
   let result = `Statement for ${data.customer}\n`;
