@@ -44,6 +44,7 @@ function amountFor(aPerformance, play) {
       if (aPerformance.audience > 20) {
         thisAmount += 10000 + 500 * (aPerformance.audience - 20);
       }
+      thisAmount += 300 * aPerformance.audience;
       break;
     default:
       throw new Error(`알 수 없는 장르: ${play.type}`);
