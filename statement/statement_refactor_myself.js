@@ -4,7 +4,7 @@ module.exports = function statement(invoice, plays) {
   let _resultManager = resultManager();
   _resultManager.addResultLine(`Statement for ${invoice.customer}`);
 
-  const format = new Intl.NumberFormat("en-US", {
+  const usd = new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
@@ -16,12 +16,12 @@ module.exports = function statement(invoice, plays) {
     _creditsManager.saveCredits(perf);
 
     _resultManager.addResultLine(
-      ` ${playFor(perf).name}: ${format(thisAmount / 100)} (${perf.audience}석)`
+      ` ${playFor(perf).name}: ${usd(thisAmount / 100)} (${perf.audience}석)`
     );
     totalAmount += thisAmount;
   }
 
-  _resultManager.addResultLine(`총액: ${format(totalAmount / 100)}`);
+  _resultManager.addResultLine(`총액: ${usd(totalAmount / 100)}`);
   _resultManager.addResultLine(`적립 포인트: ${_creditsManager.credits}점`);
 
   return _resultManager.result;
