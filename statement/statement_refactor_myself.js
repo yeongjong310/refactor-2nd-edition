@@ -11,13 +11,12 @@ module.exports = function statement(invoice, plays) {
   }).format;
 
   for (let perf of invoice.performances) {
-    const play = playFor(perf);
     let thisAmount = amountFor(perf);
 
     _creditsManager.saveCredits(perf);
 
     _resultManager.addResultLine(
-      ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience}석)`
+      ` ${playFor(perf).name}: ${format(thisAmount / 100)} (${perf.audience}석)`
     );
     totalAmount += thisAmount;
   }
