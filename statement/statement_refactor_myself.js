@@ -1,21 +1,17 @@
 module.exports = function statement(invoice, plays) {
-  let totalAmount = 0;
   let _creditsManager = creditsManager();
   let _resultManager = resultManager();
   _resultManager.addResultLine(`Statement for ${invoice.customer}`);
 
   for (let perf of invoice.performances) {
-    let thisAmount = amountFor(perf);
-
     _creditsManager.saveCredits(perf);
 
     _resultManager.addResultLine(
-      ` ${playFor(perf).name}: ${usd(thisAmount)} (${perf.audience}석)`
+      ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience}석)`
     );
-    totalAmount += thisAmount;
   }
 
-  _resultManager.addResultLine(`총액: ${usd(totalAmount)}`);
+  _resultManager.addResultLine(`총액: ${usd(totalAmount())}`);
   _resultManager.addResultLine(`적립 포인트: ${_creditsManager.credits}점`);
 
   return _resultManager.result;
@@ -89,5 +85,13 @@ module.exports = function statement(invoice, plays) {
     }
 
     return thisAmount;
+  }
+
+  function totalAmount() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += amountFor(perf);
+    }
+    return result;
   }
 };
