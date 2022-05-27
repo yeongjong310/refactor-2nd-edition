@@ -1,18 +1,13 @@
 module.exports = function statement(invoice, plays) {
   let _creditsManager = creditsManager();
-  let _resultManager = resultManager();
-  _resultManager.addResultLine(`Statement for ${invoice.customer}`);
+  let _resultManager = resultManager(invoice.customer);
 
   for (let perf of invoice.performances) {
     _creditsManager.saveCredits(perf);
-
     _resultManager.addResultLine(
       ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience}석)`
     );
   }
-
-  _resultManager.addResultLine(`총액: ${usd(totalAmount())}`);
-  _resultManager.addResultLine(`적립 포인트: ${_creditsManager.credits}점`);
 
   return _resultManager.result;
 
@@ -28,15 +23,19 @@ module.exports = function statement(invoice, plays) {
     return plays[aPerformance.playID];
   }
 
-  function resultManager() {
-    let _result = "";
+  function resultManager(customer) {
+    let _result = `Statement for ${customer}\n`;
 
     return {
       addResultLine(str) {
         _result += str + "\n";
       },
       get result() {
-        return _result;
+        return (
+          _result +
+          `총액: ${usd(totalAmount())}\n` +
+          `적립 포인트: ${_creditsManager.credits}점\n`
+        );
       },
     };
   }
