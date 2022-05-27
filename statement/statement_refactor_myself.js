@@ -16,12 +16,12 @@ module.exports = function statement(invoice, plays) {
 
   return _resultManager.result;
 
-  function usd(krw) {
+  function usd(aNumber) {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
-    }).format(krw / 100);
+    }).format(aNumber / 100);
   }
 
   function playFor(aPerformance) {
