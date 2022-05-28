@@ -1,15 +1,18 @@
 module.exports = function statement(invoice, plays) {
   let _creditsManager = creditsManager();
-  let _resultManager = resultManager(invoice.customer);
+  let _statementDataManager = statementDataManager(invoice.customer);
 
   for (let perf of invoice.performances) {
     _creditsManager.saveCredits(perf);
-    _resultManager.addResultLine(
+    _statementDataManager.add(
       ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience}석)`
     );
   }
 
-  return _resultManager.result;
+  _statementDataManager.add(`총액: ${usd(totalAmount())}`);
+  _statementDataManager.add(`적립 포인트: ${_creditsManager.credits}점`);
+
+  return renderPlainText(_statementDataManager.data);
 
   function usd(aNumber) {
     return new Intl.NumberFormat("en-US", {
@@ -23,21 +26,22 @@ module.exports = function statement(invoice, plays) {
     return plays[aPerformance.playID];
   }
 
-  function resultManager(customer) {
-    let _result = `Statement for ${customer}\n`;
+  function statementDataManager(customer) {
+    let _data = [`Statement for ${customer}`];
 
     return {
-      addResultLine(str) {
-        _result += str + "\n";
+      add(str) {
+        _data.push(str);
       },
-      get result() {
-        return (
-          _result +
-          `총액: ${usd(totalAmount())}\n` +
-          `적립 포인트: ${_creditsManager.credits}점\n`
-        );
+
+      get data() {
+        return _data;
       },
     };
+  }
+
+  function renderPlainText(statement) {
+    return statement.join("\n") + "\n";
   }
 
   function creditsManager() {
